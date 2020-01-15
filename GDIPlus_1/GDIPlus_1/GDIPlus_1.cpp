@@ -20,5 +20,5 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	{
 		return 0;
 	}
-	return (int)mainWnd.MessageLoop();
+	return mainWnd.MessageLoop();
 }

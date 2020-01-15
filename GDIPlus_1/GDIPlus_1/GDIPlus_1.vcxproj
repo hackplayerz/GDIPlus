@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DoubleBuffer.h" />
     <ClInclude Include="DrawImage.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GDIPlus_1.h" />
@@ -159,6 +160,7 @@
     <ClInclude Include="WndClass.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DoubleBuffer.cpp" />
     <ClCompile Include="DrawImage.cpp" />
     <ClCompile Include="GDIPlus_1.cpp" />
     <ClCompile Include="WndClass.cpp" />
@@ -167,6 +169,8 @@
     <ResourceCompile Include="GDIPlus_1.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="bitmap1.bmp" />
+    <Image Include="Data\BmpImage.bmp" />
     <Image Include="GDIPlus_1.ico" />
     <Image Include="small.ico" />
   </ItemGroup>

@@ -101,6 +101,32 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		}
 	}
 	break;
+
+	case WM_KEYDOWN:
+	{
+		switch (wParam)
+		{
+		case VK_LEFT:
+			_dBuffer.MoveRight(-10);
+			InvalidateRect(hWnd, nullptr, FALSE);
+			break;
+		case VK_RIGHT:
+			_dBuffer.MoveRight(10);
+			InvalidateRect(hWnd, nullptr, FALSE);
+			break;
+		case VK_UP:
+			_dBuffer.MoveDown(-10);
+			InvalidateRect(hWnd, nullptr, FALSE);
+			break;
+		case VK_DOWN:
+			_dBuffer.MoveDown(10);
+			InvalidateRect(hWnd, nullptr, FALSE);
+			break;
+		}
+	}
+	
+	break;
+
 	case WM_PAINT:
 	{
 		WindowPaint(hWnd);
@@ -120,7 +146,8 @@ void WndClass::WindowPaint(HWND hWnd)
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(hWnd, &ps);
 
-	_ImageDrawer.DrawSplitImageToFile(hdc, L"Data\\Image_1.jpg", 10, 10, 400, 400, 5, 5);
+	//_ImageDrawer.DrawSplitImageToFile(hdc, L"Data\\Image_1.jpg", 10, 10, 400, 400, 5, 5);
+	_dBuffer.DrawBufferInFile(_hInst, hWnd, hdc, L"Data\\BmpImage.bmp");
 
 	EndPaint(hWnd, &ps);
 }

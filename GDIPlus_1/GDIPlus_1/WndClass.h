@@ -3,6 +3,7 @@
 #include "Resource.h"
 
 #include "DrawImage.h"
+#include "DoubleBuffer.h"
 
 class WndClass
 {
@@ -18,7 +19,7 @@ protected:
 
 	// Custom variables
 	DrawImage _ImageDrawer;
-
+	DoubleBuffer _dBuffer;
 public:
 	// Window method
 
