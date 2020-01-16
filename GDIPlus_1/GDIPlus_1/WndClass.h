@@ -2,10 +2,11 @@
 #include "framework.h"
 #include "Resource.h"
 
+#include "Singleton.h"
 #include "DrawImage.h"
 #include "DoubleBuffer.h"
 
-class WndClass
+class WndClass : public Singleton<WndClass>
 {
 public:
 	WndClass();
@@ -33,5 +34,3 @@ public:
 	void WindowPaint(HWND hWnd);
 	// Custum method
 };
-
-static WndClass* HWndClass;

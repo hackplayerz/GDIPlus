@@ -15,10 +15,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-	WndClass mainWnd;
-	if (!mainWnd.InitInstance(hInstance, nCmdShow))
+	//WndClass mainWnd;
+	if (!WndClass::GetInstance()->InitInstance(hInstance, nCmdShow))
 	{
 		return 0;
 	}
-	return mainWnd.MessageLoop();
+	return WndClass::GetInstance()->MessageLoop();
 }

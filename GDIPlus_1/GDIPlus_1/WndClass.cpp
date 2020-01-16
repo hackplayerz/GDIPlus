@@ -4,8 +4,6 @@
 
 WndClass::WndClass() : _hInst(nullptr)
 {
-	HWndClass = this;
-
 	playerImageData.DrawPosition = _dBuffer.GetPlayableImagePos();
 	playerImageData.FileName = L"Data\\Link_1.png";
 }
@@ -16,7 +14,6 @@ WndClass::~WndClass()
 	{
 		_hInst = nullptr;
 	}
-	HWndClass = nullptr;
 }
 
 ATOM WndClass::SetRegisterClass(HINSTANCE hInstance)
@@ -81,7 +78,7 @@ int WndClass::MessageLoop()
 
 LRESULT WndClass::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	return HWndClass->MainProc(hWnd, message, wParam, lParam);
+	return GetInstance()->MainProc(hWnd, message, wParam, lParam);
 }
 
 // Window Instantiate
