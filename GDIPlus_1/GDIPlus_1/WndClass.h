@@ -13,13 +13,15 @@ public:
 protected:
 	// Window Property
 
-	HINSTANCE _hInst; 
-	TCHAR _szTitle[MAX_PATH]; 
-	TCHAR _szWindowClass[MAX_PATH]; 
+	HINSTANCE _hInst;
+	TCHAR _szTitle[MAX_PATH];
+	TCHAR _szWindowClass[MAX_PATH];
 
 	// Custom variables
 	DrawImage _ImageDrawer;
 	DoubleBuffer _dBuffer;
+
+	DoubleBuffer::ImageData playerImageData;
 public:
 	// Window method
 
@@ -30,8 +32,6 @@ public:
 	static LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 	void WindowPaint(HWND hWnd);
 	// Custum method
-
-
 };
 
 static WndClass* HWndClass;

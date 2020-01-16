@@ -5,6 +5,9 @@
 WndClass::WndClass() : _hInst(nullptr)
 {
 	HWndClass = this;
+
+	playerImageData.DrawPosition = _dBuffer.GetPlayableImagePos();
+	playerImageData.FileName = L"Data\\Link_1.png";
 }
 
 WndClass::~WndClass()
@@ -108,23 +111,30 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		{
 		case VK_LEFT:
 			_dBuffer.MoveRight(-10);
+			playerImageData.MoveRight(-10);
 			InvalidateRect(hWnd, nullptr, FALSE);
 			break;
 		case VK_RIGHT:
 			_dBuffer.MoveRight(10);
+			playerImageData.MoveRight(10);
+
 			InvalidateRect(hWnd, nullptr, FALSE);
 			break;
 		case VK_UP:
 			_dBuffer.MoveDown(-10);
+			playerImageData.MoveDown(-10);
+
 			InvalidateRect(hWnd, nullptr, FALSE);
 			break;
 		case VK_DOWN:
 			_dBuffer.MoveDown(10);
+			playerImageData.MoveDown(10);
+
 			InvalidateRect(hWnd, nullptr, FALSE);
 			break;
 		}
 	}
-	
+
 	break;
 
 	case WM_PAINT:
@@ -147,7 +157,18 @@ void WndClass::WindowPaint(HWND hWnd)
 	HDC hdc = BeginPaint(hWnd, &ps);
 
 	//_ImageDrawer.DrawSplitImageToFile(hdc, L"Data\\Image_1.jpg", 10, 10, 400, 400, 5, 5);
-	_dBuffer.DrawBufferInFile(_hInst, hWnd, hdc, L"Data\\BmpImage.bmp");
+	//_dBuffer.DrawBmpInFile(_hInst, hWnd, hdc, L"Data\\BmpImage.bmp");
+
+	queue<DoubleBuffer::ImageData> imageRenderQueue;
+
+	DoubleBuffer::ImageData mobData;
+	mobData.DrawPosition.X = 800;
+	mobData.DrawPosition.Y = 10;
+	mobData.FileName = L"Data\\Link_2.png";
+	imageRenderQueue.push(mobData);
+	imageRenderQueue.push(playerImageData);
+
+	_dBuffer.OnDrawBufferImage(_hInst, hWnd, hdc, imageRenderQueue);
 
 	EndPaint(hWnd, &ps);
 }
