@@ -1,6 +1,6 @@
 #pragma once
 
-template <typename T>
+template <class T>
 class Singleton
 {
 protected:
@@ -20,6 +20,7 @@ private:
 public:
 	static T* GetInstance()
 	{
+		/** Lazy instance for thread safe. */
 		if (!_instance)
 		{
 			_instance = new T;
@@ -27,7 +28,6 @@ public:
 		}
 		return _instance;
 	}
-
 };
 template <typename T>
 T* Singleton<T>::_instance = 0;
