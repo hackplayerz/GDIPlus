@@ -65,3 +65,32 @@ void DrawImage::DrawSplitImageToFile(HDC Hdc, LPCWSTR FullName, int XPos, int YP
 		}
 	}
 }
+
+
+void DrawImage::DrawImageInAtlas(HDC hdc, LPCWSTR FilePath, Rect rtTarget, Rect rtSouce)
+{
+	Graphics drawer(hdc);
+	Image image(FilePath);
+
+	drawer.DrawImage(&image, rtTarget,rtSouce.X,rtSouce.Y,rtSouce.Width,rtSouce.Height,UnitPixel);
+}
+
+void DrawImage::SetPlayerPosition(Rect rect)
+{
+	_playerPosition = rect;
+}
+
+Rect DrawImage::GetPlayerPosition()
+{
+	return _playerPosition;
+}
+
+void DrawImage::SetPlayerSpritePosition(Rect rect)
+{
+	_playerSpritePosition = rect;
+}
+
+Rect DrawImage::GetPlayerSpritePosition()
+{
+	return _playerSpritePosition;
+}

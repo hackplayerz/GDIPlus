@@ -5,7 +5,7 @@
 WndClass::WndClass() : _hInst(nullptr)
 {
 	playerImageData.DrawPosition = _dBuffer.GetPlayableImagePos();
-	playerImageData.FileName = L"Data\\Link_1.png";
+	playerImageData.FileName = L"Data\\BmpImage.bmp";
 }
 
 WndClass::~WndClass()
@@ -88,6 +88,34 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 {
 	switch (message)
 	{
+	case WM_CREATE:
+
+		{
+			Rect spritePos{ 0,0,24,24 };
+			_playerDrawer.SetPlayerSpritePosition(spritePos);
+		}
+		SetTimer(hWnd, _TIMER_ANIMATION, 1000 / 5, nullptr);
+		break;
+
+	case WM_TIMER:
+
+		if (wParam == _TIMER_ANIMATION)
+		{
+			{
+				Rect spritePosition = _playerDrawer.GetPlayerSpritePosition();
+				if (spritePosition.X > 24 * 9)
+				{
+					spritePosition.X = 0;
+				}
+				spritePosition.X += 24;
+				_playerDrawer.SetPlayerSpritePosition(spritePosition);
+
+				InvalidateRect(hWnd, nullptr, FALSE);
+			}
+		}
+
+		break;
+
 	case WM_COMMAND:
 	{
 		int wmId = LOWORD(wParam);
@@ -109,6 +137,7 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		case VK_LEFT:
 			_dBuffer.MoveRight(-10);
 			playerImageData.MoveRight(-10);
+
 			InvalidateRect(hWnd, nullptr, FALSE);
 			break;
 		case VK_RIGHT:
@@ -153,19 +182,35 @@ void WndClass::WindowPaint(HWND hWnd)
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(hWnd, &ps);
 
-	//_ImageDrawer.DrawSplitImageToFile(hdc, L"Data\\Image_1.jpg", 10, 10, 400, 400, 5, 5);
-	//_dBuffer.DrawBmpInFile(_hInst, hWnd, hdc, L"Data\\BmpImage.bmp");
+	//queue<DoubleBuffer::ImageData> imageRenderQueue;
 
-	queue<DoubleBuffer::ImageData> imageRenderQueue;
+	///** Init background image. */
+	//DoubleBuffer::ImageData bgData;
+	//bgData.DrawPosition.X = 0;
+	//bgData.DrawPosition.Y = 0;
+	//bgData.FileName = L"Data\\Background.png";
+	//imageRenderQueue.push(bgData);
 
-	DoubleBuffer::ImageData mobData;
-	mobData.DrawPosition.X = 800;
-	mobData.DrawPosition.Y = 10;
-	mobData.FileName = L"Data\\Link_2.png";
-	imageRenderQueue.push(mobData);
-	imageRenderQueue.push(playerImageData);
+	///** Init static image. */
+	//DoubleBuffer::ImageData mobData;
+	//mobData.DrawPosition.X = 800;
+	//mobData.DrawPosition.Y = 10;
+	//mobData.FileName = L"Data\\Link_2.png";
+	//imageRenderQueue.push(mobData);
 
-	_dBuffer.OnDrawBufferImage(_hInst, hWnd, hdc, imageRenderQueue);
+
+
+	///** Push in render queue the player data. It could be last enqueue. */
+	//imageRenderQueue.push(playerImageData);
+	//_dBuffer.OnDrawBufferImage(hWnd, hdc, imageRenderQueue);
+
+
+	DrawImage imageDrawer;
+	Rect imagePosition{10,10,35,35};
+	Rect spritePosition = _playerDrawer.GetPlayerSpritePosition();
+	imageDrawer.DrawImageInAtlas(hdc, L"Data\\DinoSprites - doux.png", imagePosition, spritePosition);
+
 
 	EndPaint(hWnd, &ps);
 }
+

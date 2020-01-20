@@ -65,7 +65,7 @@ void DoubleBuffer::DrawBmpInFile(HINSTANCE hInst, HWND hWnd, HDC hdc, LPCWSTR Fu
 	DeleteDC(bufferDc);
 }
 
-void DoubleBuffer::BuffingImageInFile(HINSTANCE hInst, HWND hWnd, HDC hdc, queue<ImageData> renderQueue)
+void DoubleBuffer::BuffingImageInFile(HWND hWnd, queue<ImageData> renderQueue)
 {
 	Graphics drawer(hWnd);
 	RECT clientRect{};
@@ -94,13 +94,15 @@ void DoubleBuffer::BuffingImageInFile(HINSTANCE hInst, HWND hWnd, HDC hdc, queue
 
 	_pCache = new CachedBitmap(pBitmap, &drawer);
 	delete pBitmap;
+	pBitmap = nullptr;
 	delete pGraphics;
+	pGraphics = nullptr;
 }
 
-void DoubleBuffer::OnDrawBufferImage(HINSTANCE hInst, HWND hWnd, HDC hdc, queue<ImageData> renderQueue)
+void DoubleBuffer::OnDrawBufferImage(HWND hWnd, HDC hdc, queue<ImageData> renderQueue)
 {
 	Graphics drawer(hdc);
-	BuffingImageInFile(hInst, hWnd, hdc, renderQueue);
+	BuffingImageInFile(hWnd, renderQueue);
 	drawer.DrawCachedBitmap(_pCache, 0, 0);
 }
 
@@ -123,3 +125,8 @@ void DoubleBuffer::ImageData::MoveDown(int Y)
 {
 	DrawPosition.Y += Y;
 }
+
+/*
+	TODO : HOMEWORK
+	∑π¿ÃΩÃ∞‘¿”
+*/

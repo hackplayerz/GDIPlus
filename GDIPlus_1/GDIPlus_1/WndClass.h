@@ -6,6 +6,8 @@
 #include "DrawImage.h"
 #include "DoubleBuffer.h"
 
+#define _TIMER_ANIMATION 1001
+
 class WndClass : public Singleton<WndClass>
 {
 public:
@@ -21,6 +23,7 @@ protected:
 	// Custom variables
 	DrawImage _ImageDrawer;
 	DoubleBuffer _dBuffer;
+	DrawImage _playerDrawer;
 
 	DoubleBuffer::ImageData playerImageData;
 public:

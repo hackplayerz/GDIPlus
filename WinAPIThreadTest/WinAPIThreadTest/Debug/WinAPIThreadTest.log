@@ -1,2 +1,6 @@
-﻿  WndClass.cpp
-  WinAPIThreadTest.vcxproj -> D:\WorkSpace\C++\SBS_Programming\WinAPIThreadTest\Debug\WinAPIThreadTest.exe
+﻿  stdafx.cpp
+  WinAPIThreadTest.cpp
+  WndClass.cpp
+  코드를 생성하고 있습니다...
+  LINK : C:\Users\Administrator\Documents\GDIPlus\WinAPIThreadTest\Debug\WinAPIThreadTest.exe을(를) 찾을 수 없거나 마지막 증분 링크에 의해 빌드되지 않았습니다. 전체 링크를 수행하고 있습니다.
+  WinAPIThreadTest.vcxproj -> C:\Users\Administrator\Documents\GDIPlus\WinAPIThreadTest\Debug\WinAPIThreadTest.exe

@@ -26,8 +26,8 @@ public:
 	void MoveRight(int X = 1);
 	void MoveDown(int Y = 1);
 	void DrawBmpInFile(HINSTANCE hInst, HWND hWnd, HDC hdc, LPCWSTR FullName);
-	void BuffingImageInFile(HINSTANCE hInst, HWND hWnd, HDC hdc, queue<ImageData> renderQueue);
-	void OnDrawBufferImage(HINSTANCE hInst, HWND hWnd, HDC hdc, queue<ImageData> renderQueue);
+	void BuffingImageInFile(HWND hWnd,queue<ImageData> renderQueue);
+	void OnDrawBufferImage(HWND hWnd, HDC hdc, queue<ImageData> renderQueue);
 
 	void MovePlayerRight(int X = 10);
 	void MovePlayerDown(int Y = 10);
