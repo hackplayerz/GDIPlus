@@ -1,3 +1,2 @@
-﻿  stdafx.cpp
-  WinAPIThreadTest.cpp
-  WinAPIThreadTest.vcxproj -> C:\Users\Administrator\Documents\GitHub\GDIPlus\WinAPIThreadTest\Debug\WinAPIThreadTest.exe
+﻿  WndClass.cpp
+  WinAPIThreadTest.vcxproj -> D:\WorkSpace\C++\SBS_Programming\WinAPIThreadTest\Debug\WinAPIThreadTest.exe
