@@ -14,6 +14,11 @@
 #include <memory.h>
 #include <tchar.h>
 
-#include <Ole2.h>
+#include <queue>
+#include <map>
+
+#include  <Ole2.h>
 #include <gdiplus.h>
 #pragma comment(lib,"Gdiplus")
+
+using namespace Gdiplus;

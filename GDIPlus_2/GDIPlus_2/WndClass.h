@@ -1,30 +1,24 @@
 #pragma once
 #include "framework.h"
 #include "Resource.h"
-
 #include "Singleton.h"
+#include "DrawImage.h"
+
+/** Window main update timer ID. */
+#define _TIMER_UPDATE 1001 
 
 class WndClass : public Singleton<WndClass>
 {
+	HINSTANCE _hInst = nullptr;
+	WCHAR _szTitle[MAX_PATH]{};             
+	WCHAR _szWindowClass[MAX_PATH]{};
+
+	DrawImage::SpriteData* _playerSprite = nullptr;
+	DrawImage* _pRenderer = nullptr;
 public:
-	WndClass();
-	~WndClass();
-protected:
-	// Window Property
-
-	HINSTANCE _hInst;
-	TCHAR _szTitle[MAX_PATH];
-	TCHAR _szWindowClass[MAX_PATH];
-
-	// Custom variables
-public:
-	// Window method
-
-	ATOM SetRegisterClass(HINSTANCE hInstance);
-	BOOL InitInstance(HINSTANCE, int);
-	LRESULT MainProc(HWND, UINT, WPARAM, LPARAM);
+	BOOL InitInstance(HINSTANCE hInstance, int nCmdShow);
+	ATOM MyRegisterClass(HINSTANCE hInstance);
+	static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	LRESULT MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	int MessageLoop();
-	static LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
-	void WindowPaint(HWND hWnd);
-	// Custum method
 };

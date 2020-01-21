@@ -1,5 +1,4 @@
 #pragma once
-
 template <class T>
 class Singleton
 {
@@ -9,6 +8,7 @@ protected:
 
 private:
 	static T* _instance;
+
 	static void Destroy()
 	{
 		if (_instance)
@@ -17,6 +17,7 @@ private:
 			_instance = nullptr;
 		}
 	}
+
 public:
 	static T* GetInstance()
 	{
@@ -29,5 +30,6 @@ public:
 		return _instance;
 	}
 };
+
 template <typename T>
-T* Singleton<T>::_instance = 0;
+T* Singleton<T>::_instance = nullptr;

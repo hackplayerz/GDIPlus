@@ -7,20 +7,20 @@
 
 #define MAX_LOADSTRING 100
 
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
-{
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
+// 전역 변수:
 
-    // 애플리케이션 초기화를 수행합니다:
-    if (WndClass::GetInstance()->InitInstance(hInstance,nCmdShow))
-    {
-        return FALSE;
-    }
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPWSTR    lpCmdLine,
+	_In_ int       nCmdShow)
+{
+	UNREFERENCED_PARAMETER(hPrevInstance);
+	UNREFERENCED_PARAMETER(lpCmdLine);
+
+	if (!WndClass::GetInstance()->InitInstance(hInstance, nCmdShow))
+	{
+		return FALSE;
+	}
 
 	return WndClass::GetInstance()->MessageLoop();
 }
-
