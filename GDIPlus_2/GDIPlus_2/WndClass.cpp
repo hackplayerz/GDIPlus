@@ -2,7 +2,9 @@
 
 BOOL WndClass::InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
-	_hInst = hInstance; // 인스턴스 핸들을 전역 변수에 저장합니다.
+	srand(GetTickCount64());
+
+	_hInst = hInstance;
 	LoadStringW(hInstance, IDS_APP_TITLE, _szTitle, MAX_PATH);
 	LoadStringW(hInstance, IDC_GDIPLUS2, _szWindowClass, MAX_PATH);
 	MyRegisterClass(hInstance);
@@ -72,20 +74,57 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	{
 	case WM_CREATE:
 		{
-		/** Initialize player animation data. */
-		_playerSprite = new DrawImage::SpriteData{ L"Assets\\Santa - Sprite Sheet.png",
-			{ 0,0 }, { 0,0 }, {96,96} };
 			_pRenderer = new DrawImage();
-			_playerSprite->AnimationSheet.insert(std::pair<int, int>(0, 5));
+			/** Initialize player animation data. */
+			_pHorses = new Horse[HorseCount];
+			_pHorses[0].InitSprite(L"Assets\\Santa - Sprite Sheet.png", { 0,-55 }, { 0,0 }, { 96,96 }, std::pair<int, int>(Horse::EAnimationState::IDLE, 5), 3);
+			_pHorses[0].AddAnimationSheet(std::pair<int, int>(Horse::EAnimationState::Run, 8));
+			_pHorses[1].InitSprite(L"Assets\\DinoSprites - doux.png", { 0,200 }, { 120,0 }, { 24,24 }, std::pair<int, int>(Horse::EAnimationState::IDLE, 5), 3);
+			_pHorses[2].InitSprite(L"Assets\\DinoSprites - mort.png", { 0,360 }, { 120,0 }, { 24,24 }, std::pair<int, int>(Horse::EAnimationState::IDLE, 5), 3);
+			_pHorses[3].InitSprite(L"Assets\\DinoSprites - tard.png", { 0,500 }, { 120,0 }, { 24,24 }, std::pair<int, int>(Horse::EAnimationState::IDLE, 5), 3);
+			_pHorses[4].InitSprite(L"Assets\\DinoSprites - vita.png", { 0,600 }, { 120,0 }, { 24,24 }, std::pair<int, int>(Horse::EAnimationState::IDLE, 5), 3);
+
+			_backGroundSprie = new DrawImage::SpriteData();
+			_backGroundSprie->InitSprite(L"Assets\\BackGround.png", { 0,0 }, { 0,0 }, { 1416,672 }, std::pair<int, int>(0, 1));
+
 			SetTimer(hWnd, _TIMER_UPDATE, 1000 / 6, nullptr);
+			SetTimer(hWnd, _TIMER_CHANGE_VALUE, 1000 / 2, nullptr);
 		}
 		break;
 
 	case WM_TIMER:
 		{
+			/** Game frame update event. */
 			if(wParam == _TIMER_UPDATE)
 			{
+				for (int i = 0; i < HorseCount; i++)
+				{
+					/** 종료점에 Inter */
+					if (_pHorses[i].DrawPosition.X > 1000)
+					{
+						// TODO :: 승자 계산 및 게임오버 (R 키 누르면 재시작 or 버튼생성)
+						for (auto iter = _winners.begin(); iter != _winners.end();++iter)
+						{
+							if (*iter != i)
+							{
+								_winners.push_back(i);
+							}
+						}
+						return;
+					}
+					_pHorses[i].Translate({ (SHORT)_pHorses[i].Speed,0 });
+				}
 				InvalidateRect(hWnd, nullptr, FALSE);
+			}
+
+			/** Change object's speed event. */
+			if (wParam == _TIMER_CHANGE_VALUE)
+			{
+				for (int i = 0; i < HorseCount; i++)
+				{
+					int randSpeed = rand() % 10;
+					_pHorses[i].Speed = randSpeed;
+				}
 			}
 		}
 		break;
@@ -93,14 +132,10 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 
 	case WM_KEYDOWN:
 	{
-		/** BUG :: Should multiply by delta time. */
 		switch (wParam)
 		{
-		case VK_LEFT:
-			_playerSprite->Translate({-10, 0});
-			break;
-		case VK_RIGHT:
-			_playerSprite->Translate({ 10, 0 });
+		case 0x52: /** R key code. */
+
 			break;
 		}
 	}		
@@ -125,52 +160,35 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		HDC hdc = BeginPaint(hWnd, &ps);
 
 		/** Rendering object initialization. */
-
-		/** Init Background Layer */
-		DrawImage::SpriteData* bgLayer1 = new DrawImage::SpriteData(L"Assets\\BG\\parallax-demon-woods-bg.png",{0,0},{0,0},{480,272});
-		bgLayer1->AnimationSheet.insert(std::pair<int, int>(0, 0));
-		DrawImage::SpriteData* bgLayer2 = new DrawImage::SpriteData(L"Assets\\BG\\parallax-demon-woods-close-trees.png", { 0,0 }, { 0,0 }, { 480,272 });
-		bgLayer2->AnimationSheet.insert(std::pair<int, int>(0, 0));
-		DrawImage::SpriteData* bgLayer3 = new DrawImage::SpriteData(L"Assets\\BG\\parallax-demon-woods-far-trees.png", { 0,0 }, { 0,0 }, { 480,272 });
-		bgLayer3->AnimationSheet.insert(std::pair<int, int>(0, 0));
-		DrawImage::SpriteData* bgLayer4 = new DrawImage::SpriteData(L"Assets\\BG\\parallax-demon-woods-mid-trees.png", { 0,0 }, { 0,0 }, { 480,272 });
-		bgLayer4->AnimationSheet.insert(std::pair<int, int>(0, 0));
-		
-		_pRenderer->AddRenderObject(bgLayer1);
-		_pRenderer->AddRenderObject(bgLayer2);
-		_pRenderer->AddRenderObject(bgLayer3);
-		_pRenderer->AddRenderObject(bgLayer4);
-		/** --- */
-
+		_pRenderer->AddRenderObject(_backGroundSprie);
+		for (int i = 0; i < 5; i++)
+		{
+			_pRenderer->AddRenderObject(&_pHorses[i]);
+		}
 		
 		/** Last rendering object. */
-		_pRenderer->AddRenderObject( _playerSprite);
 		_pRenderer->OnPlayAnimation(hWnd, hdc);
 
-		delete bgLayer1;
-		bgLayer1 = nullptr;
-		delete bgLayer2;
-		bgLayer2 = nullptr;
-		delete bgLayer3;
-		bgLayer3 = nullptr;
-		delete bgLayer4;
-		bgLayer4 = nullptr;
-		
 		EndPaint(hWnd, &ps);
 	}
 	break;
 	case WM_DESTROY:
-
-		if(_playerSprite)
+		if (_pHorses)
 		{
-			delete _playerSprite;
-			_playerSprite = nullptr;
+			delete[] _pHorses;
+			_pHorses = nullptr;
 		}
-		if(_pRenderer)
+		if (_pRenderer)
 		{
 			delete _pRenderer;
 			_pRenderer = nullptr;
 		}
+		if (_backGroundSprie)
+		{
+			delete _backGroundSprie;
+			_backGroundSprie = nullptr;
+		}
+
 		PostQuitMessage(0);
 		
 		break;

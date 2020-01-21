@@ -26,7 +26,7 @@ void DrawImage::OnPlayAnimation( HWND HWnd , HDC Hdc)
 	_pCache = nullptr;
 }
 
-void DrawImage::AddRenderObject(SpriteData * PSprite)
+void DrawImage::AddRenderObject(SpriteData* PSprite)
 {
 	_renderQueue.push(PSprite);
 }
@@ -50,7 +50,7 @@ void DrawImage::DrawSpriteInAtlas( HWND HWnd )
 		INT drawY = sprite->DrawPosition.Y;
 		INT sliceX = sprite->SpritePosition.X;
 		INT sliceY = sprite->SpritePosition.Y;
-		Rect rtTarget{ drawX,drawY, sprite->SpriteSize.X,sprite->SpriteSize.Y};
+		Rect rtTarget{ drawX,drawY, sprite->SpriteSize.X * sprite->Scale,sprite->SpriteSize.Y * sprite->Scale };
 		Rect rtSource{ sliceX,sliceY,sprite->SpriteSize.X,sprite->SpriteSize.Y };
 		
 		pBufferDrawer->DrawImage(&image,rtTarget,rtSource.X,rtSource.Y,rtSource.Width,rtSource.Height,UnitPixel);		
@@ -79,6 +79,16 @@ DrawImage::SpriteData::SpriteData(LPCWSTR FilePath, COORD DrawPosition, COORD Sl
 	this->SpriteSize = SpriteSize;
 }
 
+DrawImage::SpriteData::SpriteData(LPCWSTR FilePath, COORD DrawPosition, COORD SliceRect, COORD SpriteSize, std::pair<int, int> AnimationSheet,int Scale)
+{
+	this->FilePath = FilePath;
+	this->DrawPosition = DrawPosition;
+	this->SpritePosition = SliceRect;
+	this->SpriteSize = SpriteSize;
+	this->AnimationSheet.insert(AnimationSheet);
+	this->Scale = Scale;
+}
+
 void DrawImage::SpriteData::Translate(COORD Distance)
 {
 	DrawPosition.X += Distance.X;
@@ -104,4 +114,19 @@ void DrawImage::SpriteData::SetAnimState(UINT AnimState)
 {
 	this->AnimState = AnimState;
 	AnimIndex = 0;
+}
+
+void DrawImage::SpriteData::InitSprite(LPCWSTR FilePath, COORD DrawPos, COORD SpritePos, COORD SpriteSize, std::pair<int, int> AnimationSheet,int Scale)
+{
+	this->FilePath = FilePath;
+	this->DrawPosition = DrawPos;
+	this->SpritePosition = SpritePos;
+	this->SpriteSize = SpriteSize;
+	this->AnimationSheet.insert(AnimationSheet);
+	this->Scale = Scale;
+}
+
+void DrawImage::SpriteData::AddAnimationSheet(std::pair<int, int> AnimationSheet)
+{
+	this->AnimationSheet.insert(AnimationSheet);
 }

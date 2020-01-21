@@ -22,3 +22,4 @@
 #pragma comment(lib,"Gdiplus")
 
 using namespace Gdiplus;
+
