@@ -1,6 +1,2 @@
 ﻿  DataManager.cpp
-  GDIPlus_2.cpp
-  WndClass.cpp
-d:\workspace\c++\sbs_programming\gdiplus_2\gdiplus_2\wndclass.cpp(7): warning C4244: '인수': 'ULONGLONG'에서 'unsigned int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  코드를 생성하고 있습니다...
   GDIPlus_2.vcxproj -> D:\WorkSpace\C++\SBS_Programming\GDIPlus_2\Debug\GDIPlus_2.exe

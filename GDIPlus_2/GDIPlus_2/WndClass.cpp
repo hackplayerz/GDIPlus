@@ -73,18 +73,8 @@ INT_PTR WndClass::GameOverDialogProc(HWND HWnd, UINT Message, WPARAM WParam, LPA
 
 void WndClass::RestartGame()
 {
-	for (int i = 0; i < HorseCount; i++)
-	{
-		_pHorses[i].ResetPosition();
-		_goal[i] = false;
-	}
-	_isGaming = true;
+	DataManager::GetInstance()->ResetGameData();
 	_isGameOverDrawn = false;
-	int count = _goalQueue.size();
-	for(int i=0;i<count;i++)
-	{
-		_goalQueue.pop();
-	}
 	DestroyWindow(_hGameOverWnd);
 	DestroyWindow(_hWinnerWnd);
 }
@@ -124,27 +114,7 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 			/** Set window position. */
 			RECT clientRect = { 100,100,1430,730 };
 			SetWindowPos(hWnd, nullptr, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom,0);
-			
-		
-			_pRenderer = new DrawImage();
-			/** Initialize winner data. */
-			for(int i=0;i <HorseCount;i++)
-			{
-				_goal.insert(std::pair<int, bool>(i, false));
-			}
-		
-			/** Initialize sprite animation data. */
-			_pHorses = new Horse[HorseCount];
-			_pHorses[0].InitSprite(L"Assets\\Santa - Sprite Sheet.png", { 0,-55 }, { 0,96 }, { 96,96 }, std::pair<int, int>(Horse::EAnimationState::Run, 8), 3,Horse::EAnimationState::Run);
-			_pHorses[0].AddAnimationSheet(std::pair<int, int>(Horse::EAnimationState::IDLE, 5));
-			
-			_pHorses[1].InitSprite(L"Assets\\DinoSprites - doux.png", { 0,200 }, { 120,0 }, { 24,24 }, std::pair<int, int>(Horse::EAnimationState::IDLE, 5), 3);
-			_pHorses[2].InitSprite(L"Assets\\DinoSprites - mort.png", { 0,360 }, { 120,0 }, { 24,24 }, std::pair<int, int>(Horse::EAnimationState::IDLE, 5), 3);
-			_pHorses[3].InitSprite(L"Assets\\DinoSprites - tard.png", { 0,500 }, { 120,0 }, { 24,24 }, std::pair<int, int>(Horse::EAnimationState::IDLE, 5), 3);
-			_pHorses[4].InitSprite(L"Assets\\DinoSprites - vita.png", { 0,600 }, { 120,0 }, { 24,24 }, std::pair<int, int>(Horse::EAnimationState::IDLE, 5), 3);
-
-			_backGroundSprite = new DrawImage::SpriteData();
-			_backGroundSprite->InitSprite(L"Assets\\BackGround.png", { 0,0 }, { 0,0 }, { 1416,672 }, std::pair<int, int>(0, 1));
+			DataManager::GetInstance()->SetSpriteData();
 
 			SetTimer(hWnd, _TIMER_UPDATE, 1000 / 6, nullptr);
 			SetTimer(hWnd, _TIMER_CHANGE_VALUE, 1000 / 2, nullptr);
@@ -156,33 +126,7 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 			/** Game frame update event. */
 			if(wParam == _TIMER_UPDATE)
 			{				
-				for (int i = 0; i < HorseCount; i++)
-				{
-					/** Is player reached at goal. */
-					if (_pHorses[i].DrawPosition.X > 1300 && !_goal[i])
-					{
-						_pHorses[i].Speed = 0;
-						_goal[i] = true;
-						/** 현재 골에 들어온 선수의 인덱스를 Enqueue. */
-						_goalQueue.push(i);
-					}
-					_pHorses[i].Translate({ _pHorses[i].Speed,0 });
-				}
-
-				bool isPlayerRemain = false;
-				
-				/** Check is all player arrive at goal. */
-				for(auto iter= _goal.begin();iter != _goal.end();++iter)
-				{
-					/** Someone who has not reached at goal. */
-					if (iter->second == false)
-					{
-						isPlayerRemain = true;
-						break;
-					}
-				}
-				_isGaming = isPlayerRemain;
-				
+				DataManager::GetInstance()->UpdateSprite();				
 				/** Start rendering. */
 				InvalidateRect(hWnd, nullptr, FALSE);
 			}
@@ -192,11 +136,11 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 			{
 				for (int i = 0; i < HorseCount; i++)
 				{
-					if(_pHorses[i].Speed <= 0)
+					if(DataManager::GetInstance()->Horses[i].Speed <= 0)
 						continue;
 					
 					int randSpeed = rand() % 10 + 5;
-					_pHorses[i].Speed = randSpeed;
+					DataManager::GetInstance()->Horses[i].Speed = randSpeed;
 				}
 			}
 		}
@@ -210,7 +154,7 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		case 0x52: /** R key code. */
 			
 			/** 게임 종료시 R버튼 이벤트 바인딩. */
-			if(!_isGaming)
+			if (!DataManager::GetInstance()->IsGaming())
 			{
 				RestartGame();
 			}
@@ -243,23 +187,14 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		RECT clientRect{}; ///< 현재 Main window의 크기.
 		GetClientRect(hWnd, &clientRect);		
 		
-		/** Rendering object initialization. */
-		_pRenderer->AddRenderObject(_backGroundSprite);
-		for (int i = 0; i < 5; i++)
-		{
-			_pRenderer->AddRenderObject(&_pHorses[i]);
-		}
-		
-		/** Last rendering object. */
-		_pRenderer->OnPlayAnimation(hWnd, hdc);
-
+		DataManager::GetInstance()->StartRendering(hWnd, hdc);
 
 		/** Game over event. */
-		if (!_isGaming && !_isGameOverDrawn)
+		if (!DataManager::GetInstance()->IsGaming() && !_isGameOverDrawn)
 		{
 			_isGameOverDrawn = true;
 			_hGameOverWnd = CreateWindow(L"Button", L"Restart Game", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, clientRect.right / 2 - 200, clientRect.bottom / 2 - 30, 200, 30, hWnd, (HMENU)IDX_BTN_GAMEOVER, _hInst, nullptr);
-			wsprintf(WinnerText, L"Winner : %d", _goalQueue.front());
+			wsprintf(WinnerText, L"Winner : %d", DataManager::GetInstance()->GoalQueue.front());
 			DialogBox(_hInst, MAKEINTRESOURCE(IDD_DIG_WINNER), hWnd, GameOverDialogProc);				
 		}
 
@@ -268,22 +203,7 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	}
 	break;
 	case WM_DESTROY:
-		if (_pHorses)
-		{
-			delete[] _pHorses;
-			_pHorses = nullptr;
-		}
-		if (_pRenderer)
-		{
-			delete _pRenderer;
-			_pRenderer = nullptr;
-		}
-		if (_backGroundSprite)
-		{
-			delete _backGroundSprite;
-			_backGroundSprite = nullptr;
-		}
-
+		DataManager::GetInstance()->DestroyAllData();
 		PostQuitMessage(0);
 		
 		break;
