@@ -59,15 +59,46 @@ INT_PTR WndClass::GameOverDialogProc(HWND HWnd, UINT Message, WPARAM WParam, LPA
 
 				SetWindowPos(HWnd,GetParent(HWnd),parentClientRect.right/2 - myClientRect.right/2,parentClientRect.bottom /2 - myClientRect.top,myClientRect.right,myClientRect.bottom,0);
 				SetDlgItemText(HWnd, IDC_EDIT_WINNER, WinnerText);
+				SetTimer(HWnd, _TIMER_GAME_OVER_UPDATE, 1000 / 6, nullptr);
 			}
 		return static_cast<int>(TRUE);
 		
+		case WM_TIMER:
+			InvalidateRect(HWnd, nullptr, FALSE);
+			break;
+
 		case WM_COMMAND:
 			switch (LOWORD( WParam ))
 			{
+
 			case IDOK:
 				EndDialog(HWnd, WParam);
 			}
+		break;
+
+		case WM_PAINT:
+		{
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint(HWnd, &ps);
+
+			DrawImage render;
+			int winnerIndex = DataManager::GetInstance()->GoalQueue.front();
+			Horse winner = DataManager::GetInstance()->Horses[winnerIndex];
+			/** Santa의 Sprite 데이터 오류로 인한 위칫값 재설정. */
+			if (winnerIndex == 0)
+			{
+				winner.DrawPosition = { 200,10 };
+				winner.SetAnimState(Horse::EAnimationState::IDLE);
+			}
+			else
+			{
+				winner.DrawPosition = { 200,100 };
+			}
+			render.AddRenderObject(&winner);
+			render.OnPlayAnimation(HWnd,hdc);
+
+			EndPaint(HWnd, &ps);
+		}
 		break;
 
 		case WM_DESTROY:
@@ -210,7 +241,7 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		{
 			_isGameOverDrawn = true;
 			_hGameOverWnd = CreateWindow(L"Button", L"Restart Game", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, clientRect.right / 2 - 200, clientRect.bottom / 2 - 30, 200, 30, hWnd, (HMENU)IDX_BTN_GAMEOVER, _hInst, nullptr);
-			wsprintf(WinnerText, L"Winner : %d", DataManager::GetInstance()->GoalQueue.front());
+			wsprintf(WinnerText, L"Winner : %d", DataManager::GetInstance()->GoalQueue.front() + 1);
 			DialogBox(_hInst, MAKEINTRESOURCE(IDD_DIG_WINNER), hWnd, GameOverDialogProc);				
 		}
 

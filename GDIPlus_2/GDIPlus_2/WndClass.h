@@ -7,6 +7,7 @@
 /** Window main update timer ID. */
 #define _TIMER_UPDATE 1001 
 #define _TIMER_CHANGE_VALUE 1002
+#define _TIMER_GAME_OVER_UPDATE 1003
 #define IDX_BTN_GAMEOVER 3001
 #define IDX_BTN_READY 3002
 #define IDX_WND_WINNER 4001
