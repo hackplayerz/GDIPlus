@@ -23,6 +23,16 @@ void DataManager::SetSpriteData()
 	BackGroundSprite->InitSprite(L"Assets\\BackGround.png", { 0,0 }, { 0,0 }, { 1416,672 }, std::pair<int, int>(0, 1));
 }
 
+void DataManager::SetReady(bool IsReady)
+{
+	_isReady = IsReady;
+}
+
+bool DataManager::IsReady()
+{
+	return _isReady;
+}
+
 void DataManager::SetIsGaming(bool IsGaming)
 {
 	_isGaming = IsGaming;
@@ -64,7 +74,12 @@ void DataManager::UpdateSprite()
 			/** 현재 골에 들어온 선수의 인덱스를 Enqueue. */
 			GoalQueue.push(i);
 		}
-		Horses[i].Translate({ Horses[i].Speed,0 });
+
+		/** Ready가 완료된 상태에서만 이동가능. */
+		if (_isReady)
+		{
+			Horses[i].Translate({ Horses[i].Speed,0 });
+		}
 	}
 
 	bool isPlayerRemain = false;

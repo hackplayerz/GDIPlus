@@ -52,6 +52,12 @@ INT_PTR WndClass::GameOverDialogProc(HWND HWnd, UINT Message, WPARAM WParam, LPA
 	{
 		case WM_INITDIALOG:
 			{
+				RECT parentClientRect{};
+				RECT myClientRect{};
+				GetClientRect(GetParent(HWnd), &parentClientRect);
+				GetClientRect(HWnd, &myClientRect);
+
+				SetWindowPos(HWnd,GetParent(HWnd),parentClientRect.right/2 - myClientRect.right/2,parentClientRect.bottom /2 - myClientRect.top,myClientRect.right,myClientRect.bottom,0);
 				SetDlgItemText(HWnd, IDC_EDIT_WINNER, WinnerText);
 			}
 		return static_cast<int>(TRUE);
@@ -111,10 +117,13 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	{
 	case WM_CREATE:
 		{
+			DataManager::GetInstance()->SetSpriteData();
+
 			/** Set window position. */
 			RECT clientRect = { 100,100,1430,730 };
 			SetWindowPos(hWnd, nullptr, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom,0);
-			DataManager::GetInstance()->SetSpriteData();
+
+			_hReadyBtnWnd = CreateWindow(L"Button", L"Ready", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, clientRect.right / 2 - 150, clientRect.bottom / 2 - 30, 150, 30, hWnd, (HMENU)IDX_BTN_READY, _hInst, nullptr);
 
 			SetTimer(hWnd, _TIMER_UPDATE, 1000 / 6, nullptr);
 			SetTimer(hWnd, _TIMER_CHANGE_VALUE, 1000 / 2, nullptr);
@@ -168,6 +177,13 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		
 		switch (wmId)
 		{
+		case IDX_BTN_READY:
+		{
+			DataManager::GetInstance()->SetReady(true);
+			DestroyWindow(_hReadyBtnWnd);
+		}
+			break;
+
 		case IDX_BTN_GAMEOVER:
 			RestartGame();
 			break;

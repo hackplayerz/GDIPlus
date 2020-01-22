@@ -7,6 +7,7 @@ constexpr int HorseCount = 5;
 class DataManager : public Singleton<DataManager>
 {
 	bool _isGaming = true;
+	bool _isReady = false;
 public:
 	Horse* Horses = nullptr;
 	DrawImage::SpriteData* BackGroundSprite = nullptr;
@@ -16,7 +17,8 @@ public:
 
 public:
 	void SetSpriteData();
-
+	void SetReady(bool IsReady);
+	bool IsReady();
 	void SetIsGaming(bool IsGaming);
 	bool IsGaming();
 	void DestroyAllData();

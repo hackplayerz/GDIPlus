@@ -8,8 +8,8 @@
 #define _TIMER_UPDATE 1001 
 #define _TIMER_CHANGE_VALUE 1002
 #define IDX_BTN_GAMEOVER 3001
+#define IDX_BTN_READY 3002
 #define IDX_WND_WINNER 4001
-
 
 
 class WndClass : public Singleton<WndClass>
@@ -21,6 +21,7 @@ class WndClass : public Singleton<WndClass>
 	bool _isGameOverDrawn = false; ///< 게임오버 화면이 드로우 되었는지 확인.	
 	HWND _hGameOverWnd = nullptr;
 	HWND _hWinnerWnd = nullptr;
+	HWND _hReadyBtnWnd;
 
 public:
 	BOOL InitInstance(HINSTANCE hInstance, int nCmdShow);
