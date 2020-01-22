@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DataManager.h" />
     <ClInclude Include="DrawImage.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GDIPlus_2.h" />
@@ -161,6 +162,7 @@
     <ClInclude Include="WndClass.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DataManager.cpp" />
     <ClCompile Include="DrawImage.cpp" />
     <ClCompile Include="GDIPlus_2.cpp" />
     <ClCompile Include="Horse.cpp" />

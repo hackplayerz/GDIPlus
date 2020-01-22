@@ -1,5 +1,7 @@
 #include "WndClass.h"
 
+static TCHAR WinnerText[25];
+
 BOOL WndClass::InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
 	srand(GetTickCount64());
@@ -42,6 +44,51 @@ int WndClass::MessageLoop()
 	return static_cast<int>(msg.wParam);
 }
 
+INT_PTR WndClass::GameOverDialogProc(HWND HWnd, UINT Message, WPARAM WParam, LPARAM LParam)
+{
+	UNREFERENCED_PARAMETER(LParam);
+
+	switch (Message)
+	{
+		case WM_INITDIALOG:
+			{
+				SetDlgItemText(HWnd, IDC_EDIT_WINNER, WinnerText);
+			}
+		return static_cast<int>(TRUE);
+		
+		case WM_COMMAND:
+			switch (LOWORD( WParam ))
+			{
+			case IDOK:
+				EndDialog(HWnd, WParam);
+			}
+		break;
+
+		case WM_DESTROY:
+			EndDialog(HWnd, WParam);
+		break;
+	}
+	return static_cast<INT_PTR>(FALSE);
+}
+
+void WndClass::RestartGame()
+{
+	for (int i = 0; i < HorseCount; i++)
+	{
+		_pHorses[i].ResetPosition();
+		_goal[i] = false;
+	}
+	_isGaming = true;
+	_isGameOverDrawn = false;
+	int count = _goalQueue.size();
+	for(int i=0;i<count;i++)
+	{
+		_goalQueue.pop();
+	}
+	DestroyWindow(_hGameOverWnd);
+	DestroyWindow(_hWinnerWnd);
+}
+
 ATOM WndClass::MyRegisterClass(HINSTANCE hInstance)
 {
 	WNDCLASSEXW wcex;
@@ -74,18 +121,30 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	{
 	case WM_CREATE:
 		{
+			/** Set window position. */
+			RECT clientRect = { 100,100,1430,730 };
+			SetWindowPos(hWnd, nullptr, clientRect.left, clientRect.top, clientRect.right, clientRect.bottom,0);
+			
+		
 			_pRenderer = new DrawImage();
-			/** Initialize player animation data. */
+			/** Initialize winner data. */
+			for(int i=0;i <HorseCount;i++)
+			{
+				_goal.insert(std::pair<int, bool>(i, false));
+			}
+		
+			/** Initialize sprite animation data. */
 			_pHorses = new Horse[HorseCount];
-			_pHorses[0].InitSprite(L"Assets\\Santa - Sprite Sheet.png", { 0,-55 }, { 0,0 }, { 96,96 }, std::pair<int, int>(Horse::EAnimationState::IDLE, 5), 3);
-			_pHorses[0].AddAnimationSheet(std::pair<int, int>(Horse::EAnimationState::Run, 8));
+			_pHorses[0].InitSprite(L"Assets\\Santa - Sprite Sheet.png", { 0,-55 }, { 0,96 }, { 96,96 }, std::pair<int, int>(Horse::EAnimationState::Run, 8), 3,Horse::EAnimationState::Run);
+			_pHorses[0].AddAnimationSheet(std::pair<int, int>(Horse::EAnimationState::IDLE, 5));
+			
 			_pHorses[1].InitSprite(L"Assets\\DinoSprites - doux.png", { 0,200 }, { 120,0 }, { 24,24 }, std::pair<int, int>(Horse::EAnimationState::IDLE, 5), 3);
 			_pHorses[2].InitSprite(L"Assets\\DinoSprites - mort.png", { 0,360 }, { 120,0 }, { 24,24 }, std::pair<int, int>(Horse::EAnimationState::IDLE, 5), 3);
 			_pHorses[3].InitSprite(L"Assets\\DinoSprites - tard.png", { 0,500 }, { 120,0 }, { 24,24 }, std::pair<int, int>(Horse::EAnimationState::IDLE, 5), 3);
 			_pHorses[4].InitSprite(L"Assets\\DinoSprites - vita.png", { 0,600 }, { 120,0 }, { 24,24 }, std::pair<int, int>(Horse::EAnimationState::IDLE, 5), 3);
 
-			_backGroundSprie = new DrawImage::SpriteData();
-			_backGroundSprie->InitSprite(L"Assets\\BackGround.png", { 0,0 }, { 0,0 }, { 1416,672 }, std::pair<int, int>(0, 1));
+			_backGroundSprite = new DrawImage::SpriteData();
+			_backGroundSprite->InitSprite(L"Assets\\BackGround.png", { 0,0 }, { 0,0 }, { 1416,672 }, std::pair<int, int>(0, 1));
 
 			SetTimer(hWnd, _TIMER_UPDATE, 1000 / 6, nullptr);
 			SetTimer(hWnd, _TIMER_CHANGE_VALUE, 1000 / 2, nullptr);
@@ -96,24 +155,35 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		{
 			/** Game frame update event. */
 			if(wParam == _TIMER_UPDATE)
-			{
+			{				
 				for (int i = 0; i < HorseCount; i++)
 				{
-					/** 종료점에 Inter */
-					if (_pHorses[i].DrawPosition.X > 1000)
+					/** Is player reached at goal. */
+					if (_pHorses[i].DrawPosition.X > 1300 && !_goal[i])
 					{
-						// TODO :: 승자 계산 및 게임오버 (R 키 누르면 재시작 or 버튼생성)
-						for (auto iter = _winners.begin(); iter != _winners.end();++iter)
-						{
-							if (*iter != i)
-							{
-								_winners.push_back(i);
-							}
-						}
-						return;
+						_pHorses[i].Speed = 0;
+						_goal[i] = true;
+						/** 현재 골에 들어온 선수의 인덱스를 Enqueue. */
+						_goalQueue.push(i);
 					}
-					_pHorses[i].Translate({ (SHORT)_pHorses[i].Speed,0 });
+					_pHorses[i].Translate({ _pHorses[i].Speed,0 });
 				}
+
+				bool isPlayerRemain = false;
+				
+				/** Check is all player arrive at goal. */
+				for(auto iter= _goal.begin();iter != _goal.end();++iter)
+				{
+					/** Someone who has not reached at goal. */
+					if (iter->second == false)
+					{
+						isPlayerRemain = true;
+						break;
+					}
+				}
+				_isGaming = isPlayerRemain;
+				
+				/** Start rendering. */
 				InvalidateRect(hWnd, nullptr, FALSE);
 			}
 
@@ -122,7 +192,10 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 			{
 				for (int i = 0; i < HorseCount; i++)
 				{
-					int randSpeed = rand() % 10;
+					if(_pHorses[i].Speed <= 0)
+						continue;
+					
+					int randSpeed = rand() % 10 + 5;
 					_pHorses[i].Speed = randSpeed;
 				}
 			}
@@ -135,7 +208,12 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		switch (wParam)
 		{
 		case 0x52: /** R key code. */
-
+			
+			/** 게임 종료시 R버튼 이벤트 바인딩. */
+			if(!_isGaming)
+			{
+				RestartGame();
+			}
 			break;
 		}
 	}		
@@ -146,6 +224,10 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		
 		switch (wmId)
 		{
+		case IDX_BTN_GAMEOVER:
+			RestartGame();
+			break;
+			
 		case IDM_EXIT:
 			DestroyWindow(hWnd);
 			break;
@@ -158,9 +240,11 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	{
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
-
+		RECT clientRect{}; ///< 현재 Main window의 크기.
+		GetClientRect(hWnd, &clientRect);		
+		
 		/** Rendering object initialization. */
-		_pRenderer->AddRenderObject(_backGroundSprie);
+		_pRenderer->AddRenderObject(_backGroundSprite);
 		for (int i = 0; i < 5; i++)
 		{
 			_pRenderer->AddRenderObject(&_pHorses[i]);
@@ -169,6 +253,17 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		/** Last rendering object. */
 		_pRenderer->OnPlayAnimation(hWnd, hdc);
 
+
+		/** Game over event. */
+		if (!_isGaming && !_isGameOverDrawn)
+		{
+			_isGameOverDrawn = true;
+			_hGameOverWnd = CreateWindow(L"Button", L"Restart Game", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, clientRect.right / 2 - 200, clientRect.bottom / 2 - 30, 200, 30, hWnd, (HMENU)IDX_BTN_GAMEOVER, _hInst, nullptr);
+			wsprintf(WinnerText, L"Winner : %d", _goalQueue.front());
+			DialogBox(_hInst, MAKEINTRESOURCE(IDD_DIG_WINNER), hWnd, GameOverDialogProc);				
+		}
+
+		
 		EndPaint(hWnd, &ps);
 	}
 	break;
@@ -183,10 +278,10 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 			delete _pRenderer;
 			_pRenderer = nullptr;
 		}
-		if (_backGroundSprie)
+		if (_backGroundSprite)
 		{
-			delete _backGroundSprie;
-			_backGroundSprie = nullptr;
+			delete _backGroundSprite;
+			_backGroundSprite = nullptr;
 		}
 
 		PostQuitMessage(0);
@@ -197,4 +292,3 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 	}
 	return 0;
 }
-

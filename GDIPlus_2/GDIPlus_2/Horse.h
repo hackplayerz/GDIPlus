@@ -7,6 +7,8 @@ struct Horse : public DrawImage::SpriteData
 		IDLE = 0,
 		Run
 	};
-	INT Speed = 5;
+	SHORT Speed = 5;
+
+	void ResetPosition() override;
 };
 

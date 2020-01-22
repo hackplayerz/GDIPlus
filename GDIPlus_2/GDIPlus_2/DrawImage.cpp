@@ -77,9 +77,10 @@ DrawImage::SpriteData::SpriteData(LPCWSTR FilePath, COORD DrawPosition, COORD Sl
 	this->DrawPosition = DrawPosition;
 	this->SpritePosition = SliceRect;
 	this->SpriteSize = SpriteSize;
+	this->_startPosition = DrawPosition;
 }
 
-DrawImage::SpriteData::SpriteData(LPCWSTR FilePath, COORD DrawPosition, COORD SliceRect, COORD SpriteSize, std::pair<int, int> AnimationSheet,int Scale)
+DrawImage::SpriteData::SpriteData(LPCWSTR FilePath, COORD DrawPosition, COORD SliceRect, COORD SpriteSize, std::pair<int, int> AnimationSheet,int Scale,INT StartState)
 {
 	this->FilePath = FilePath;
 	this->DrawPosition = DrawPosition;
@@ -87,6 +88,9 @@ DrawImage::SpriteData::SpriteData(LPCWSTR FilePath, COORD DrawPosition, COORD Sl
 	this->SpriteSize = SpriteSize;
 	this->AnimationSheet.insert(AnimationSheet);
 	this->Scale = Scale;
+	this->_startPosition = DrawPosition;
+	this->_startState = StartState;
+	this->_animState = StartState;
 }
 
 void DrawImage::SpriteData::Translate(COORD Distance)
@@ -97,26 +101,26 @@ void DrawImage::SpriteData::Translate(COORD Distance)
 
 void DrawImage::SpriteData::PlayNextAnimation()
 {
-	AnimIndex++;
-	int maxIndex = AnimationSheet[AnimState] -1; ///< Animation last index.
-	if (maxIndex < AnimIndex)
+	_animIndex++;
+	int maxIndex = AnimationSheet[_animState] -1; ///< Animation last index.
+	if (maxIndex < _animIndex)
 	{
-		AnimIndex = 0;
+		_animIndex = 0;
 		SpritePosition.X = 0;
-		SpritePosition.Y = AnimState * SpriteSize.Y;
+		SpritePosition.Y = _animState * SpriteSize.Y;
 		return;
 	}
 	SpritePosition.X += SpriteSize.X;
-	SpritePosition.Y = AnimState * SpriteSize.Y;
+	SpritePosition.Y = _animState * SpriteSize.Y;
 }
 
 void DrawImage::SpriteData::SetAnimState(UINT AnimState)
 {
-	this->AnimState = AnimState;
-	AnimIndex = 0;
+	this->_animState = AnimState;
+	_animIndex = 0;
 }
 
-void DrawImage::SpriteData::InitSprite(LPCWSTR FilePath, COORD DrawPos, COORD SpritePos, COORD SpriteSize, std::pair<int, int> AnimationSheet,int Scale)
+void DrawImage::SpriteData::InitSprite(LPCWSTR FilePath, COORD DrawPos, COORD SpritePos, COORD SpriteSize, std::pair<int, int> AnimationSheet,int Scale, INT StartState)
 {
 	this->FilePath = FilePath;
 	this->DrawPosition = DrawPos;
@@ -124,9 +128,22 @@ void DrawImage::SpriteData::InitSprite(LPCWSTR FilePath, COORD DrawPos, COORD Sp
 	this->SpriteSize = SpriteSize;
 	this->AnimationSheet.insert(AnimationSheet);
 	this->Scale = Scale;
+	this->_startPosition = DrawPosition;
+	this->_startState = StartState;
+	this->_animState = StartState;
 }
 
 void DrawImage::SpriteData::AddAnimationSheet(std::pair<int, int> AnimationSheet)
 {
 	this->AnimationSheet.insert(AnimationSheet);
+}
+
+void DrawImage::SpriteData::ResetPosition()
+{
+	DrawPosition = _startPosition;
+	_animIndex = 0;
+	_animState = _startState;
+	
+	SpritePosition.X = 0;
+	SpritePosition.Y = _animState * SpriteSize.Y;
 }
