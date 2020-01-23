@@ -1,6 +1,6 @@
 #include "WndClass.h"
 
-static TCHAR WinnerText[25];
+
 
 BOOL WndClass::InitInstance(HINSTANCE hInstance, int nCmdShow)
 {
@@ -58,7 +58,7 @@ INT_PTR WndClass::GameOverDialogProc(HWND HWnd, UINT Message, WPARAM WParam, LPA
 				GetClientRect(HWnd, &myClientRect);
 
 				SetWindowPos(HWnd,GetParent(HWnd),parentClientRect.right/2 - myClientRect.right/2,parentClientRect.bottom /2 - myClientRect.top,myClientRect.right,myClientRect.bottom,0);
-				SetDlgItemText(HWnd, IDC_EDIT_WINNER, WinnerText);
+				SetDlgItemText(HWnd, IDC_EDIT_WINNER, DataManager::GetInstance()->WinnerText);
 				SetTimer(HWnd, _TIMER_GAME_OVER_UPDATE, 1000 / 6, nullptr);
 			}
 		return static_cast<int>(TRUE);
@@ -241,7 +241,7 @@ LRESULT WndClass::MainProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
 		{
 			_isGameOverDrawn = true;
 			_hGameOverWnd = CreateWindow(L"Button", L"Restart Game", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON, clientRect.right / 2 - 200, clientRect.bottom / 2 - 30, 200, 30, hWnd, (HMENU)IDX_BTN_GAMEOVER, _hInst, nullptr);
-			wsprintf(WinnerText, L"Winner : %d", DataManager::GetInstance()->GoalQueue.front() + 1);
+			wsprintf(DataManager::GetInstance()->WinnerText, L"Winner : %d", DataManager::GetInstance()->GoalQueue.front() + 1);
 			DialogBox(_hInst, MAKEINTRESOURCE(IDD_DIG_WINNER), hWnd, GameOverDialogProc);				
 		}
 

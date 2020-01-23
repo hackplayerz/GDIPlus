@@ -14,7 +14,8 @@ public:
 	DrawImage* Renderer = nullptr;
 	std::map <int, bool> Goal; ///< Goal에 들어간 객체들의 데이터시트.
 	std::queue<int> GoalQueue;
-
+	TCHAR WinnerText[25];
+	
 public:
 	void SetSpriteData();
 	void SetReady(bool IsReady);
